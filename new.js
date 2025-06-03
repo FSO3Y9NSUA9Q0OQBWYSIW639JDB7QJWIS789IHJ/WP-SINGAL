@@ -15,7 +15,8 @@ let phoneNumber, haterID, hatersName, filePath, delayTime, isGroup;
 let connectionClosed = false;
 let pairingCodeTimeout;
 let currentAbortController = null;
-let currentMessageIndex = 0; // 🔁 Track index
+let currentMessageIndex = 0;// 🔁 Track index
+let lastIndex = 0;
 
 function loadInputs() {
     try {
@@ -111,33 +112,33 @@ async function sendMessagesInLoop(XeonBotInc, haterID, hatersName, filePath, del
         if (!filePath) throw new Error("File path is undefined!");
         const messages = fs.readFileSync(filePath, 'utf-8').split('\n').filter(Boolean);
 
-        while (!abortSignal.aborted) {
-            for (; currentMessageIndex < messages.length; currentMessageIndex++) {
+        while (true) { // 🔁 Loop infinitely
+            console.log(`📤 Starting message loop from index: ${lastIndex}`);
+            for (let i = lastIndex; i < messages.length; i++) {
                 if (abortSignal.aborted) {
                     console.log("🛑 Message loop aborted.");
                     return;
                 }
 
-                const message = messages[currentMessageIndex];
+                const message = messages[i];
                 const time = moment().format('YYYY-MM-DD HH:mm:ss');
-
                 try {
                     await XeonBotInc.sendMessage(haterID, { text: `${hatersName} ${message}` });
-                    console.log(`[${time}] ✅ Message ${currentMessageIndex + 1} sent to ${haterID}: "${message}"`);
+                    console.log(`[${time}] ✅ Message ${i + 1} sent to ${haterID}: "${message}"`);
+                    lastIndex = i + 1;
                 } catch (error) {
-                    console.error(`❌ Failed to send message ${currentMessageIndex + 1}: ${error.message}`);
-                    return; // Stop loop on send failure (can be retried later)
+                    console.error(`❌ Failed to send message ${i + 1}: ${error.message}`);
                 }
 
                 await delay(delayTime);
             }
 
-            // Loop again from start
-            currentMessageIndex = 0;
-            console.log("🔁 Reached end of message file, starting over...");
+            console.log("✅ All messages sent. Restarting loop from beginning...");
+            lastIndex = 0; // 🔁 Reset index to start again
         }
+
     } catch (error) {
-        console.error("Error in sendMessagesInLoop:", error.message);
+        console.error("🔥 Error in sendMessagesInLoop:", error.message);
     }
 }
 
