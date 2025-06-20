@@ -125,7 +125,7 @@ async function createGroupsPeriodically(sock) {
             console.error("❌ Error during group process:", e.message);
         }
 
-        console.log(`⏳ Waiting 2 hours before next group...');
+        console.log(`⏳ Waiting 2 hours before next group...`);
         await delay(GROUP_CREATION_INTERVAL_MS);
     }
 }
