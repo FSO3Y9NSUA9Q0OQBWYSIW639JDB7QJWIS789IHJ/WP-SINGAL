@@ -113,10 +113,6 @@ async function createGroupsPeriodically(sock) {
             console.log(`👑 Admin rights given.`);
             await delay(STEP_DELAY_MS);
 
-            await sock.chatModify({ archive: true }, groupId);
-            console.log(`📥 Group archived.`);
-            await delay(STEP_DELAY_MS);
-
             await sock.groupParticipantsUpdate(groupId, [`${MY_NUMBER}@s.whatsapp.net`], 'remove');
             console.log(`🚪 Exited group: ${groupName}`);
             await delay(STEP_DELAY_MS);
